@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import pdb
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -619,6 +621,9 @@ class pfind3():
         
         #AFTERMATH
         #TODO: to options
+        #TODO: this file saving block to sep. function!!!
+        
+        signalnum = 0 # + write C style file
         file = open( self.filename[: self.filename.rfind('.')  ] + '_results' + '.txt'  , "w")
         pfind3_gui.set_state("after-counting")
         pfind3_gui.set_progbar_indeterminate(True)
@@ -634,10 +639,26 @@ class pfind3():
                     count +=1
             pfind3_gui.console_logln("count: ", str(count), '\n', signal, '\n')
             file.write("count: "+ str(count)+ '\n'+ str(signal)+ '\n\n')
+            
+            # + write C style file
+            signalnum += 1
+            h_filename =  self.filename[: self.filename.rfind('.')  ] + '_' + str(signalnum) +  '.h'        
+            with open(h_filename, 'w') as hfile:
+                hfile.write("// count: "+ str(count)+ "\n")
+                hfile.write("uint8_t {} [] = ".format(h_filename[ h_filename.rfind(os.sep)+1 : h_filename.rfind('.')  ] ) )
+                hfile.write("{ \n")
+                for i in range(0, len(signal)-2):
+                    hfile.write(str(signal[i])+',')
+                hfile.write(str(signal[len(signal)-1])+'\n')
+                hfile.write("} \n" )
+            
+            
         pfind3_gui.set_progbar_indeterminate(False)
         file.close()
         pfind3_gui.console_logln('#'*80)
         
+        
+
 
 
 
