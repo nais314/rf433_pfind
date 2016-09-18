@@ -44,3 +44,23 @@ class OptionWindow(tk.Toplevel):
         self.ent_max_pattern_count_while_search = tk.Entry(master=self, width=3, textvariable=self.v_max_pattern_count_while_search)
         self.ent_max_pattern_count_while_search.grid(column= 0, row=row)
         #.................................
+        row=2
+        self.v_align_beyond_pattern_length = tk.IntVar()
+        self.v_align_beyond_pattern_length.set(1)
+        
+        self.lab_align_beyond_pattern_length = tk.Label(master=self, text="align_beyond_pattern_length")
+        self.lab_align_beyond_pattern_length.grid(column= 1, row=row )
+        
+        self.chk_align_beyond_pattern_length = tk.Checkbutton ( master=self, variable = self.v_align_beyond_pattern_length )
+        self.chk_align_beyond_pattern_length.grid(column= 0, row=row)
+        #.................................
+        row=3
+        self.v_drop_small_result = tk.IntVar()
+        self.v_drop_small_result.set(1)
+        
+        self.lab_drop_small_result = tk.Label(master=self, text="drop_small_result")
+        self.lab_drop_small_result.grid(column= 1, row=row )
+        
+        self.chk_drop_small_result = tk.Checkbutton ( master=self, variable = self.v_drop_small_result )
+        self.chk_drop_small_result.grid(column= 0, row=row)
+

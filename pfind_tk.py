@@ -48,9 +48,10 @@ class pfind3():
 
         self.CANCEL_SIGNAL = False
 
-        self.MAX_PATT_COUNT = 3 # stop pattern search after N found
+        #self.MAX_PATT_COUNT = 3 # stop pattern search after N found
         self.MAX_PATT_COUNT = pfind3_gui.get_v_max_pattern_count_while_search()
         self.SCATTER = 2 # magic number
+        self.MIN_SIGNAL_LEN = 6 #TODO not yet in options
 
         self.sample_size_list = []
 
@@ -375,7 +376,8 @@ class pfind3():
                             self.pattdict[patt]["count"] += 1 # count maybe obsolete
                             self.pattdict[patt]["pos"].append([ii, ii+SAMPLE_SIZE-1])
                             # cache:
-                            if self.pattdict[patt]["count"] >= self.MAX_PATT_COUNT: break # cache:---------------------
+                            if self.MAX_PATT_COUNT > 0: # see opt window
+                                if self.pattdict[patt]["count"] >= self.MAX_PATT_COUNT: break # cache:---------------------
                         else:
                             self.pattdict[patt] = {}
                             self.pattdict[patt]["count"] = 1
@@ -431,7 +433,15 @@ class pfind3():
                     (self.pattlist[i][0] in self.pattlist[ii][0])
                     #or (self.pattlist[i][0][2:-2] in self.pattlist[ii][0])
                     #or (self.pattlist[i][0][4:-4] in self.pattlist[ii][0])
-                    #or (self.pattlist[i][0][6:-6] in self.pattlist[ii][0])
+                    or (    ( len(self.pattlist[i][0]) > 2 ) 
+                        and (pfind3_gui.get_v_align_beyond_pattern_length == 1) 
+                        and (self.pattlist[i][0][2:-2] in self.pattlist[ii][0]) )
+                    or (    ( len(self.pattlist[i][0]) > 4 ) 
+                        and (pfind3_gui.get_v_align_beyond_pattern_length == 1) 
+                        and (self.pattlist[i][0][4:-4] in self.pattlist[ii][0]) )
+                    or (    ( len(self.pattlist[i][0]) > 6 ) 
+                        and (pfind3_gui.get_v_align_beyond_pattern_length == 1) 
+                        and (self.pattlist[i][0][6:-6] in self.pattlist[ii][0]) )
                     ):
                         if i not in to_remove:
                             to_remove.append(i)
@@ -499,6 +509,7 @@ class pfind3():
                         if len(self.pattlist[i][1]["pos"]) > 2 and cc > 0:
                             for apos in range( 2, len(self.pattlist[i][1]["pos"]) ):
                                 if self.CANCEL_SIGNAL : return False #      <<<< break <<<<
+                                
                                 if ( self.rawdata[ self.pattlist[i][1]["pos"][bpos][1] -cc  ]
                                 ==   self.rawdata[ self.pattlist[i][1]["pos"][apos][1] -cc  ] ):
                                     self.pattlist[i][0] = str(  self.rawdata[ self.pattlist[i][1]["pos"][bpos][1] -cc ]  ) + self.pattlist[i][0]
@@ -596,9 +607,39 @@ class pfind3():
         #print('#'*80)
         #print(adat1)
         #print('#'*80)
+        #file = open( self.filename[: self.filename.rfind('.')  ] + '_results' + '.txt'  , "w")
+        #pfind3_gui.console_logln('#'*80)
+        #pfind3_gui.console_logln("Possible signals:")
+        #for signal in results:
+        #    if pfind3_gui.get_v_drop_small_result() == 1 and len(signal) < self.MIN_SIGNAL_LEN : continue
+        #    pfind3_gui.console_logln(signal )
+        #    file.write(str(signal)+'\n\n')
+        #pfind3_gui.console_logln('#'*80)
+        #file.close()
+        
+        #AFTERMATH
+        #TODO: to options
+        file = open( self.filename[: self.filename.rfind('.')  ] + '_results' + '.txt'  , "w")
+        pfind3_gui.set_state("after-counting")
+        pfind3_gui.set_progbar_indeterminate(True)
         pfind3_gui.console_logln('#'*80)
-        pfind3_gui.console_logln(results)
+        pfind3_gui.console_logln("Possible Signals + count:")
+        for signal in results:
+            if self.CANCEL_SIGNAL : return False #      <<<< break <<<<
+            if pfind3_gui.get_v_drop_small_result() == 1 and len(signal) < self.MIN_SIGNAL_LEN : continue
+            count = 0
+            for i in range(len(self.rawdata)-len(signal)):
+                if self.CANCEL_SIGNAL : return False #      <<<< break <<<<
+                if self.rawdata[i: i+len(signal)] == signal:
+                    count +=1
+            pfind3_gui.console_logln("count: ", str(count), '\n', signal, '\n')
+            file.write("count: "+ str(count)+ '\n'+ str(signal)+ '\n\n')
+        pfind3_gui.set_progbar_indeterminate(False)
+        file.close()
         pfind3_gui.console_logln('#'*80)
+        
+
+
 
 
 
@@ -701,7 +742,7 @@ def center(toplevel):
 #**************************************************************
 if __name__ == "__main__":
 
-
+    app.geometry("300x300+100+100")
     app.optwin = OptionWindow()
 
     pfind3_gui = pfind_gui_tk(app)
@@ -709,15 +750,10 @@ if __name__ == "__main__":
 
     win = MyFrame(pfind3_gui)
     
-    #center( win )
-    
-    
-    
-    
-    
     app.win = win
     
-    #app.win.geometry("400x400+100+100")
+    pfind3_gui.show_opt()
+    
     
     #tk.Grid.columnconfigure(app, 0, weight=1)
     #tk.Grid.rowconfigure(app, 0, weight=1)

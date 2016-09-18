@@ -82,6 +82,12 @@ class pfind_gui_tk():
     def get_v_max_pattern_count_while_search(self):
         return int(self.app.optwin.v_max_pattern_count_while_search.get())
         
+    def get_v_align_beyond_pattern_length(self):
+        return int(self.app.optwin.v_align_beyond_pattern_length.get())
+
+    def get_v_drop_small_result(self):
+        return int(self.app.optwin.v_drop_small_result.get())
+        
     def pattern_finder_run(self):
         global pattern_finder
         self.app.pattern_finder.run()
